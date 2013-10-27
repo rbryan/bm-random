@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct num{
+	unsigned int value;
+	struct num * next;
+	struct num * prev;
+};
+typedef struct num num;
+
+union bytes{
+	char bytes[4];
+	int  value;
+};
+
+num* pushnum(int val, num* prev);
+
+int main(int argc, char** argv){
+	
+	FILE* fp;
+	union bytes temp;	
+	int i;
+	char c;
+	int size;
+	num* current = NULL;
+
+	if(argc != 2){
+		fprintf(stderr,"Usage: conv <filename>\n");
+		exit(0);
+	}
+	if((fp=fopen(argv[1],"rb"))==NULL){
+		fprintf(stderr,"Could not open file.\nUsage: conv <filename>\n");
+		exit(0);
+	}
+	fseek(fp,0,SEEK_END);
+	fprintf(stderr,"Size of file: %d\n",ftell(fp));
+	fseek(fp,0,SEEK_SET);
+	while(1==1){
+		int done = 0;
+		fread(temp.bytes,sizeof(char),4,fp);
+		printf("%u\n",temp.value);
+		
+
+	}
+	
+	fclose(fp);
+
+
+	return 0;
+}
+
+
+
+num *pushnum(int val,num *prev){
+	num* newnum;
+	if((newnum=calloc(sizeof(num),1))==NULL){
+		fprintf(stderr, "Out of memory error: pushnum(%d)\n", val);
+		exit(0);
+	}
+	newnum->value = val;
+	if(prev==NULL){
+		return newnum;
+	}else{
+		prev->next = newnum;
+		newnum->prev = prev;
+		return newnum;
+	}
+	
+}
+
