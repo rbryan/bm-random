@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -g -Wall -O2
+CFLAGS = -g -Wall -O0
 
 img: main.o ident.o images.o particles.o tracking.o hashing.o config.h
-	$(CC) $(CFLAGS) -Wall tracking.o images.o ident.o particles.o hashing.o main.o -o img `imlib2-config --cflags` `imlib2-config --libs` -lm -lcrypto -lssl
+	$(CC) $(CFLAGS) -Wall tracking.o images.o ident.o particles.o hashing.o main.o -o img `imlib2-config --cflags` `imlib2-config --libs` -lm -lcrypto -lssl -lSDL -lpthread
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c

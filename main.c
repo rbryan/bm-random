@@ -23,62 +23,88 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "images.h"
 #include "particles.h"
 #include "ident.h"
 #include "tracking.h"
+#include "hashing.h"
 
-#define IMG_SET 3
+pthread_mutex_t lock;
 
-int main(int argc, char *argv[])
-{	
-	int start, finish;
-	start = 1;
-	finish = 599;
-	image *img;
-	char fn[30],outname[30];
-	partlist *listcurrent=0, *listprev=0;
-	int i;
-	
-	sprintf(fn,"data/set_%d/%d.jpg",IMG_SET,start);
-	img = loadImage(fn);
+struct data{
+	char name[90];
+	int *num;
+	char *directory;
+	char *ext;
+};
+
+void *pimage(void *dat){	//This should get passed a file name and return a partlist
+	image *img=NULL;
+	struct data *data;
+	partlist *plist;
+	int *i;
+	data = (struct data *) dat;
+	pthread_mutex_lock(&lock);
+	for(i=data->num; (img==NULL); *(i)++){
+		sprintf(data->name,"%s%d%s",data->directory,*i,data->ext);
+		img = loadImage(data->name);
+		//printf("img %d\n",*i);
+	}
+	pthread_mutex_unlock(&lock);
+	if(img == NULL) return NULL;
 	threshold(img->red, img->red, 29, 149);
 	img->red = gradient(img->red);
-	listprev = calloc(1,sizeof(partlist));
-	listprev = getParticles(img->red);
+	plist = getParticles(img->red);
 	freeImage(img);
+	return (void *)plist;
+}
+
+void spawnt(struct data *dat,pthread_t *thread){
+	pthread_create(thread,NULL,&pimage,(void*)dat);
+}
+
+
+int main(int argc, char **argv)
+{	
+	pthread_t threads[2];
+	pthread_mutex_init(&lock,NULL);
+
+	if(argc < 4) printf("Usage: <prgrm> <directory> <file extension> <# of images>\n");
+	char *directory;
+	directory = argv[1];
+	char *ext;
+	ext = argv[2];
+	int num,i=1;
+	num = atoi(argv[3]);
+	struct data dat;
+	dat.directory = directory;
+	dat.ext = ext;
+	dat.num = &i;
+
+	partlist *listcurrent=0, *listprev=0;
+	sprintf(dat.name,"%s%d%s",directory,i,ext);
+	spawnt(&dat,&threads[0]);
+	sprintf(dat.name,"%s%d%s",directory,++i,ext);
+	spawnt(&dat,&threads[1]);	
+	pthread_join(threads[0],(void **)&listprev);
+	pthread_join(threads[1],(void **)&listcurrent);
 	
-	
-	for(i=start+1; i<finish; i++){
+	for(i=i+1; i<num; i++){
 		//fprintf(stderr,"Image #%d\n",i);
-		sprintf(fn,"data/set_%d/%d.jpg",IMG_SET,i);
-		img = loadImage(fn);
-		
-		if(img==NULL){
-			continue;
-		}
-		
-		threshold(img->red, img->red, 29, 149);
-
-		img->red = gradient(img->red);
-
-		listcurrent = getParticles(img->red);
-
+		sprintf(dat.name,"%s%d%s",directory,i,ext);
+		spawnt(&dat,&threads[0]);
 		link_parts(listprev,listcurrent);
-		//printf("main.c: main(): Number of particles: %d\n",(int)listcurrent->size);
-		drawparts(img->red, listprev, 255);
-		fill_matrix(img->green, 0);
-		fill_matrix(img->blue, 0);
-		sprintf(outname,"output/%d.bmp",i);
-		saveImage(img,outname);
-		
+		hashlist(listprev);
 		freePartlist(listprev);
 		listprev = listcurrent;
-		
-		freeImage(img);
+		pthread_join(threads[0],(void **)&listcurrent);
 
 	}
+	pthread_mutex_destroy(&lock);
+	freePartlist(listprev);
 	freePartlist(listcurrent);
     return 0;
 
 }
+

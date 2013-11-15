@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "particles.h"
+#include <stdint.h>
+
+union partdata{
+	struct particle part;
+	char data[20];	
+};
 
 
 void pop(char * data,int *len, int index){
@@ -38,4 +45,24 @@ char * SHA512_hash(const char *data, int len){
 	//md[SHA512_DIGEST_LENGTH] = '\0';
 	//md = cleanhash(md,SHA512_DIGEST_LENGTH+1);
 	return md;
+}
+static void hashpart(particle *p){
+	char message[20];
+	char md[SHA512_DIGEST_LENGTH];
+	memcpy(message, ((union partdata *)p)->data,20);
+	memcpy(md,SHA512_hash(message,20),64);
+	int counter;
+	for(counter = 0; counter < SHA512_DIGEST_LENGTH; counter=counter+4){
+		printf("%u\n",*((uint32_t *) &md[counter]));
+	}
+
+}
+void hashlist(partlist *parts){
+	particle *current;
+	int i;
+	current=parts->spart;
+	for(i=0; i<parts->size; i++, current = current->nextParticle){
+		hashpart(current);
+	}
+
 }

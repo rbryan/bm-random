@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "particles.h"
 #include "images.h"
 #include "config.h"
@@ -35,12 +36,18 @@
 
 #include "hashing.h"
 
+
+
 extern void find_radius(particle *part);
 extern void find_center(particle *part);
 extern particle *floodfill(matrix *mat, int id, int x, int y);
 extern void floodfill_work(matrix *mat, particle *part, int x, int y, int *id);
 
-
+struct thread{
+	pthread_t id;
+	int state;
+};
+typedef struct thread thread;
 
 //This function just makes it more convenient to assign an id to each
 //new particle. It's really only used in getParticles().
@@ -167,14 +174,7 @@ void drawparts(matrix *mat, partlist *parts, uint8_t val){
 			
 		}
 		//printf("%d %d %d %d\n",current->x, current->y, current->nextFrame->x, current->nextFrame->y);
-		char message[20];
-		char md[SHA512_DIGEST_LENGTH];
-		memcpy(message, ((union partdata *)current)->data,20);
-		memcpy(md,SHA512_hash(message,20),64);
-		int counter;
-		for(counter = 0; counter < SHA512_DIGEST_LENGTH; counter=counter+4){
-			printf("%u\n",((union num*)&md[counter])->val);
-		}
+		
 		//printf("%s",SHA512_hash(message,20));
 		drawline(mat,200,current->x, current->y, current->nextFrame->x, current->nextFrame->y);
 		cur_pixel = current->nextFrame->spt;
