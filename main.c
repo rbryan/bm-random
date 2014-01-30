@@ -70,7 +70,10 @@ int main(int argc, char **argv)
 	pthread_t threads[2];
 	pthread_mutex_init(&lock,NULL);
 
-	if(argc < 4) printf("Usage: <prgrm> <directory> <file extension> <# of images>\n");
+	if(argc < 4) {
+		printf("Usage: <prgrm> <directory> <file extension> <# of images>\n");
+		exit(1);
+	}
 	char *directory;
 	directory = argv[1];
 	char *ext;
