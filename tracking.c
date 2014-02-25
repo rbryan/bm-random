@@ -34,47 +34,61 @@
 //Remember to note that particles may overlap and several particles
 //can potentially be linked to the same successor.
 
-void link_parts(partlist *partsa, partlist *partsb){
-	int i,j;
-	double best=0,distance=0;
-	particle *best_part,*next;
-	particle *current,*check;
+void
+link_parts (partlist * partsa, partlist * partsb)
+{
+  int i, j;
+  double best = 0, distance = 0;
+  particle *best_part, *next;
+  particle *current, *check;
 #ifndef USE_RADIUS_THRESH
-	double size_diff;
-	size_diff = SIZE_DIFF_LIMIT/100.00;
+  double size_diff;
+  size_diff = SIZE_DIFF_LIMIT / 100.00;
 #endif
-	current = partsa->spart;
-	
-	for(i=0; i < partsa->size; i++, current = next){
-		check = partsb->spart;
-		best_part = NULL;
-		best = DBL_MAX;
-		for(j=0; j < partsb->size; j++, check = check->nextParticle){
-			distance = dist(current->x,current->y,check->x,check->y);
+  current = partsa->spart;
+
+  for (i = 0; i < partsa->size; i++, current = next)
+    {
+      check = partsb->spart;
+      best_part = NULL;
+      best = DBL_MAX;
+      for (j = 0; j < partsb->size; j++, check = check->nextParticle)
+	{
+	  distance = dist (current->x, current->y, check->x, check->y);
 #ifndef	USE_RADIUS_THRESH
-			if( distance < best && abs(current->size - check->size)/current->size < size_diff){
+	  if (distance < best
+	      && abs (current->size - check->size) / current->size <
+	      size_diff)
+	    {
 #endif
 #ifdef USE_RADIUS_THRESH
-			if(distance < best && distance > current->radius*0.05 && distance < current->radius*1.1){
+	      if (distance < best && distance > current->radius * 0.05
+		  && distance < current->radius * 1.1)
+		{
 #endif
-				best_part = check;
-				best = distance;
-			}else{
-				continue;
-			}
-			
+		  best_part = check;
+		  best = distance;
 		}
-		next = current->nextParticle;
-		if(best_part == NULL){
-			freeParticle(popParticle(partsa, current));
-			i--;
-			continue;
-		}else{
-			current->nextFrame = best_part;
+	      else
+		{
+		  continue;
 		}
-		
-		
+
+	    }
+	  next = current->nextParticle;
+	  if (best_part == NULL)
+	    {
+	      freeParticle (popParticle (partsa, current));
+	      i--;
+	      continue;
+	    }
+	  else
+	    {
+	      current->nextFrame = best_part;
+	    }
+
+
 	}
 
-}
+    }
 
