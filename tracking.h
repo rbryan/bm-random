@@ -22,4 +22,4 @@
  */
 
 
-void link_parts(partlist *partsa, partlist *partsb);
+void link_parts (partlist * partsa, partlist * partsb);

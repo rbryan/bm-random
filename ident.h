@@ -24,6 +24,6 @@
 
 #include <stdio.h>
 
-extern double dist(int x1,int y1,int x2,int y2);
-extern partlist *getParticles(matrix *mat);
-extern void drawparts(matrix *mat, partlist *parts, uint8_t val);
+extern double dist (int x1, int y1, int x2, int y2);
+extern partlist *getParticles (matrix * mat);
+extern void drawparts (matrix * mat, partlist * parts, uint8_t val);

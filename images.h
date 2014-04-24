@@ -25,26 +25,26 @@
 
 typedef struct
 {
-    int width, height;
-    uint8_t **vals;
+  int width, height;
+  uint8_t **vals;
 } matrix;
 
 
 typedef struct
 {
-    int width, height;
+  int width, height;
 
-    matrix *red;
-    matrix *green;
-    matrix *blue;
+  matrix *red;
+  matrix *green;
+  matrix *blue;
 } image;
 
-extern void freeMatrix(matrix *mat);
-extern void freeImage(image *img);
-extern matrix *newMatrix(int width, int height);
-extern image *loadImage(const char *filename);
-extern void saveImage(image *img, const char *filename);
-extern matrix *avgGreyscale(image *img);
-extern matrix *gradient(matrix *mat);
-extern void threshold(matrix *mat, matrix *dest, uint8_t min, uint8_t max);
-extern void fill_matrix(matrix * mat, uint8_t value);
+extern void freeMatrix (matrix * mat);
+extern void freeImage (image * img);
+extern matrix *newMatrix (int width, int height);
+extern image *loadImage (const char *filename);
+extern void saveImage (image * img, const char *filename);
+extern matrix *avgGreyscale (image * img);
+extern matrix *gradient (matrix * mat);
+extern void threshold (matrix * mat, matrix * dest, uint8_t min, uint8_t max);
+extern void fill_matrix (matrix * mat, uint8_t value);

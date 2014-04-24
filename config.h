@@ -29,11 +29,11 @@
 
 //Leave this defined if you want to descriminate particles by radius
 //rather than surface area.
-#define USE_RADIUS_THRESH	
+#define USE_RADIUS_THRESH
 
 #ifdef USE_RADIUS_THRESH
 #define RAD_MAX				10
-#define RAD_MIN				4	
+#define RAD_MIN				4
 #endif
 
 #ifndef USE_RADIUS_THRESH
@@ -41,6 +41,3 @@
 #define MIN_PART_SIZE		50
 #define SIZE_DIFF_LIMIT		10
 #endif
-
-
-

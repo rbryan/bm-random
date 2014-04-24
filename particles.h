@@ -20,52 +20,56 @@
  * 
  * 
  */
- 
-struct vec2d{
-	int x,y;
+
+struct vec2d
+{
+  int x, y;
 };
 
 typedef struct vec2d vec2d;
 
 
-struct pt{
-	int id;
-	int x,y;
-	struct pt *prevPt;
-	struct pt *nextPt;
+struct pt
+{
+  int id;
+  int x, y;
+  struct pt *prevPt;
+  struct pt *nextPt;
 };
 
 typedef struct pt pt;
 
 #pragma pack(0)
-struct particle{
-	int size,x,y;
-	double radius;
-	struct pt *spt,*ept;  //start point and end point
-	int id;
-	struct particle *nextFrame;
-	struct particle *prevParticle;
-	struct particle *nextParticle;
+struct particle
+{
+  int size, x, y;
+  double radius;
+  struct pt *spt, *ept;		//start point and end point
+  int id;
+  struct particle *nextFrame;
+  struct particle *prevParticle;
+  struct particle *nextParticle;
 };
 #pragma pack()
 typedef struct particle particle;
 
-struct partlist{
-	int size;
-	struct particle *spart;
-	struct particle *epart;
-	
+struct partlist
+{
+  int size;
+  struct particle *spart;
+  struct particle *epart;
+
 };
 
 typedef struct partlist partlist;
 
 
-extern void freePartlist( partlist *plist);
-extern particle *newParticle(int id);
-extern pt *newPt(int id, int x, int y);
-extern pt *jump(pt *start,int n);
-extern void pushPt(pt *point, particle *par);
-extern pt *popPt(pt *point, particle *par);
-extern particle *popParticle(partlist *plist, particle *part);
-extern void freeParticle(particle *par);
-extern void pushParticle( partlist *plist, particle *part);
+extern void freePartlist (partlist * plist);
+extern particle *newParticle (int id);
+extern pt *newPt (int id, int x, int y);
+extern pt *jump (pt * start, int n);
+extern void pushPt (pt * point, particle * par);
+extern pt *popPt (pt * point, particle * par);
+extern particle *popParticle (partlist * plist, particle * part);
+extern void freeParticle (particle * par);
+extern void pushParticle (partlist * plist, particle * part);
