@@ -1,4 +1,4 @@
-CC = /usr/bin/gcc
+CC = /usr/local/bin/gcc -fdiagnostics-color=auto
 DEBUG = -g -pg
 CFLAGS =  $(DEBUG) -Wall -O3 -fopenmp -ffast-math -funroll-loops -lgomp -L /usr/local/lib64 
 
