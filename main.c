@@ -40,20 +40,16 @@ struct data {
     char *ext;
 };
 
-void *pimage(void *dat)
+partlist *pimage(struct data *dat)
 {				//This should get passed a file name and return a partlist
     image *img = NULL;
-    struct data *data;
     partlist *plist;
     int *i;
-    data = (struct data *) dat;
-    pthread_mutex_lock(&lock);
-    for (i = data->num; (img == NULL); *(i)++) {
-	sprintf(data->name, "%s%d%s", data->directory, *i, data->ext);
-	img = loadImage(data->name);
+    for (i = dat->num; (img == NULL); *(i)++) {
+	sprintf(dat->name, "%s%d%s", dat->directory, *i, dat->ext);
+	img = loadImage(dat->name);
 	//printf("img %d\n",*i);
     }
-    pthread_mutex_unlock(&lock);
     if (img == NULL)
 	return NULL;
     threshold(img->red, img->red, 29, 149);
@@ -62,53 +58,66 @@ void *pimage(void *dat)
     //printf("%ld\n",(long int) img->red);
     plist = getParticles(img->red);
     freeImage(img);
-    return (void *) plist;
+    return plist;
 }
 
-void spawnt(struct data *dat, pthread_t * thread)
-{
-    pthread_create(thread, NULL, &pimage, (void *) dat);
-}
 
 
 int main(int argc, char **argv)
 {
-    pthread_t threads[2];
-    pthread_mutex_init(&lock, NULL);
 
     if (argc < 4) {
 	printf
 	    ("Usage: <prgrm> <directory> <file extension> <# of images>\n");
 	exit(1);
     }
+
     char *directory;
     directory = argv[1];
+
     char *ext;
     ext = argv[2];
+
     int num, i = 1;
     num = atoi(argv[3]);
+
+    //initialize the data structure
     struct data dat;
     dat.directory = directory;
     dat.ext = ext;
     dat.num = &i;
 
-    partlist *listcurrent = 0, *listprev = 0;
-    sprintf(dat.name, "%s%d%s", directory, i, ext);
-    spawnt(&dat, &threads[0]);
-    sprintf(dat.name, "%s%d%s", directory, ++i, ext);
-    spawnt(&dat, &threads[1]);
-    pthread_join(threads[0], (void **) &listprev);
-    pthread_join(threads[1], (void **) &listcurrent);
+    //create the particle lists
+    partlist *listcurrent = 0, *listprev = 0, *tmp = 0;
 
+    //process the first two images
+    sprintf(dat.name, "%s%d%s", directory, i, ext);
+    listprev = pimage(&dat);
+
+    sprintf(dat.name, "%s%d%s", directory, ++i, ext);
+    listcurrent = pimage(&dat);
+
+    //process the rest of the image set
+    //#pragma omp parallel for private(i)
     for (i = i + 1; i < num; i++) {
-	//fprintf(stderr,"Image #%d\n",i);
-	sprintf(dat.name, "%s%d%s", directory, i, ext);
-	spawnt(&dat, &threads[0]);
-	link_parts(listprev, listcurrent);
-	hashlist(listprev);
-	freePartlist(listprev);
-	listprev = listcurrent;
-	pthread_join(threads[0], (void **) &listcurrent);
+        #pragma omp parallel sections
+	{
+            #pragma omp section
+	    {
+		sprintf(dat.name, "%s%d%s", directory, i, ext);
+		tmp = pimage(&dat);
+	    }
+
+            #pragma omp section
+	    {
+		link_parts(listprev, listcurrent);
+		hashlist(listprev);
+		freePartlist(listprev);
+		listprev = listcurrent;
+	    }
+	}
+	
+	listcurrent = tmp;
 
     }
     pthread_mutex_destroy(&lock);
